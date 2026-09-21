@@ -33,24 +33,24 @@ The lids needs to be glued. For the bayonet lid all outside rings attach to the 
         self.buildArgParser("h", "outside")
         self.argparser.add_argument(
             "--radius_bottom",  action="store", type=float, default=50.0,
-            help="inner radius of the box bottom (at the corners)")
+            help="**Radio INTERIOR de la base de la caja (mm).** Mide desde el centro hasta el borde interno de cada esquina.\n\n**EFECTO:** Controla el tamaño de la base poligonal. \n\n**CÁLCULO:** Para una caja hexagonal de ~100mm de ancho total, usa radio ≈ 50mm.\n\n⚠️ **IMPORTANTE:** Si `outside=True`, este valor se ajusta automáticamente restando el grosor del material.")
         self.argparser.add_argument(
             "--radius_top",  action="store", type=float, default=50.0,
-            help="inner radius of the box top (at the corners)")
+            help="**Radio INTERIOR de la parte superior de la caja (mm).** Permite crear cajas cónicas (más estrechas o anchas arriba).\n\n**IGUAL que radius_bottom:** Paredes verticales rectas.\n\n**MENOR que radius_bottom:** Caja se estrecha hacia arriba (como un trofeo).\n\n**MAYOR que radius_bottom:** Caja se ensancha hacia arriba (como una maceta).")
         self.argparser.add_argument(
             "--n",  action="store", type=int, default=5,
-            help="number of sides")
+            help="**Número de lados del polígono.** Define la forma de la caja.\n\n**EJEMPLOS:**\n- 3 = Triángulo\n- 4 = Cuadrado/Rectángulo\n- 5 = Pentágono\n- 6 = Hexágono (muy común)\n- 8 = Octógono\n\n⚠️ **LÍMITES:** Mínimo 3 lados. Valores muy altos (>20) aproximan un círculo.")
         self.argparser.add_argument(
             "--top",  action="store", type=str, default="none",
             choices=["none", "hole", "angled hole", "angled lid", "angled lid2", "round lid", "bayonet mount", "closed"],
-            help="style of the top and lid")
+            help="**Tipo de tapa superior.** Controla cómo se cierra la caja por arriba.\n\n**OPCIONES:**\n- `none`: Sin tapa (caja abierta)\n- `closed`: Tapa sólida cerrada\n- `hole`: Agujero circular centrado (para cables, ventilación)\n- `angled hole`: Agujero con bisel (mejor acabado)\n- `angled lid`: Tapa con bisel que encaja sobre la caja\n- `angled lid2`: Tapa con bisel + reborde interior\n- `round lid`: Tapa circular independiente\n- `bayonet mount`: Montura tipo bayoneta (giro y traba)")
         self.argparser.add_argument(
             "--alignment_pins",  action="store", type=float, default=1.0,
-            help="diameter of the alignment pins for bayonet lid")
+            help="**Diámetro de los pines de alineación para tapa bayoneta (mm).** Solo aplica si `top=\"bayonet mount\"`.\n\n**FUNCIÓN:** Guían la tapa al girarla para asegurar el encaje correcto.\n\n**RECOMENDACIÓN:** \n- MDF 3mm → 1.0mm (palillo de dientes)\n- MDF 6mm → 2.0mm (clavija pequeña)\n\n⚠️ Debe ser mayor que el kerf del láser para que los pines no queden sueltos.")
         self.argparser.add_argument(
             "--bottom",  action="store", type=str, default="closed",
             choices=["none", "closed", "hole", "angled hole", "angled lid", "angled lid2", "round lid"],
-            help="style of the bottom and bottom lid")
+            help="**Tipo de base inferior.** Similar a `top` pero para la parte de abajo.\n\n**RECOMENDACIONES:**\n- `closed`: Base sólida (lo más común)\n- `none`: Sin base (caja abierta por abajo)\n- `hole`: Con agujero (drenaje, paso de cables)\n\n💡 **TIP:** Usa la misma configuración que `top` para simetría, o `closed` abajo y otro tipo arriba.")
 
         self.lugs=6
 

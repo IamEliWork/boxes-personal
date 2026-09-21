@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 import xml.etree.ElementTree as ET
 from boxes import Boxes
 from shapely.geometry import Point, Polygon, MultiPolygon, box
@@ -16,57 +16,53 @@ class CorelComponentGenerator(Boxes):
         super().__init__()
         
         # Parámetros del componente
-        self.add_argument(
-            "component_folder", type=str, default="trofeos",
+        self.argparser.add_argument(
+            "--component_folder", type=str, default="trofeos",
             choices=["trofeos", "logos", "decoraciones"],
             help="Carpeta donde está el componente SVG (dentro de static/components/)"
         )
-        self.add_argument(
-            "component_filename", type=str, default="f1_trophy.svg",
+        self.argparser.add_argument(
+            "--component_filename", type=str, default="f1_trophy.svg",
             help="Nombre del archivo SVG exportado desde CorelDRAW"
         )
-        self.add_argument(
-            "component_scale", type=float, default=1.0,
+        self.argparser.add_argument(
+            "--component_scale", type=float, default=1.0,
             help="Escala del componente (1.0 = tamaño original del SVG)"
         )
-        self.add_argument(
-            "component_rotation", type=float, default=0.0,
+        self.argparser.add_argument(
+            "--component_rotation", type=float, default=0.0,
             help="Rotación del componente (grados)"
         )
-        self.add_argument(
-            "component_x", type=float, default=0.0,
+        self.argparser.add_argument(
+            "--component_x", type=float, default=0.0,
             help="Posición X del componente respecto al centro de la base (mm)"
         )
-        self.add_argument(
-            "component_y", type=float, default=0.0,
+        self.argparser.add_argument(
+            "--component_y", type=float, default=0.0,
             help="Posición Y del componente respecto al centro de la base (mm)"
         )
         
         # Parámetros de la base
-        self.add_argument(
-            "base_shape", type=str, default="circle",
+        self.argparser.add_argument(
+            "--base_shape", type=str, default="circle",
             choices=["circle", "rectangle", "none"],
             help="Forma base sobre la cual se coloca el componente"
         )
-        self.add_argument(
-            "base_size", type=float, default=80.0,
+        self.argparser.add_argument(
+            "--base_size", type=float, default=80.0,
             help="Diámetro (círculo) o lado (cuadrado) de la base (mm)"
         )
-        self.add_argument(
-            "base_offset", type=float, default=5.0,
+        self.argparser.add_argument(
+            "--base_offset", type=float, default=5.0,
             help="Margen entre el componente y el borde de la base (mm)"
         )
 
-    def load_svg_component(self, folder, filename, scale, rotation, x, y):
+    def load_svg_component(self, folder: str, filename: str, scale: float, rotation: float, x: float, y: float) -> Polygon | MultiPolygon | None:
         """Carga un SVG y lo convierte a polígonos de Shapely."""
-        filepath = os.path.join(
-            os.path.dirname(__file__), 
-            "..", "static", "components", 
-            folder, filename
-        )
+        filepath = Path(__file__).parent / ".." / "static" / "components" / folder / filename
         
-        if not os.path.exists(filepath):
-            print(f"⚠️  ADVERTENCIA: No se encontró {filepath}")
+        if not filepath.exists():
+            print(f"Warning: File not found: {filepath}")
             return box(-5, -5, 5, 5)  # Fallback
         
         try:
@@ -112,7 +108,7 @@ class CorelComponentGenerator(Boxes):
                         all_paths.append(circ)
             
             if not all_paths:
-                print(f"⚠️  ADVERTENCIA: No se encontraron formas válidas en {filename}")
+                print(f"Warning: No valid shapes found in {filename}")
                 return box(-5, -5, 5, 5)
             
             # Unir todos los polígonos en uno solo
@@ -135,11 +131,11 @@ class CorelComponentGenerator(Boxes):
             
             return combined
             
-        except Exception as e:
-            print(f"❌ ERROR al cargar {filename}: {str(e)}")
+        except (ValueError, IndexError, ET.ParseError) as e:
+            print(f"Error loading {filename}: {e}")
             return box(-5, -5, 5, 5)
 
-    def _parse_svg_path(self, path_data):
+    def _parse_svg_path(self, path_data: str) -> Polygon | None:
         """Convierte un path SVG (atributo 'd') a polígono de Shapely."""
         # Simplificación: solo maneja comandos básicos (M, L, Z)
         # Para paths complejos, se recomienda exportar desde Corel como polígonos
@@ -163,10 +159,10 @@ class CorelComponentGenerator(Boxes):
                     return poly.buffer(0)  # Intentar arreglar
             
             return None
-        except:
+        except (ValueError, IndexError):
             return None
 
-    def _parse_svg_polygon(self, points_str):
+    def _parse_svg_polygon(self, points_str: str) -> Polygon | None:
         """Convierte un polygon SVG (atributo 'points') a polígono de Shapely."""
         try:
             coords = [float(x) for x in points_str.replace(',', ' ').split() if x]
@@ -180,7 +176,7 @@ class CorelComponentGenerator(Boxes):
                     return poly.buffer(0)
             
             return None
-        except:
+        except (ValueError, IndexError):
             return None
 
     def render(self):

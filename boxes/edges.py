@@ -859,18 +859,28 @@ class FingerJointSettings(Settings):
 Values:
 
 * absolute
-  * style : "rectangular" : style of the fingers
-  * surroundingspaces : 2.0 : space at the start and end in multiple of normal spaces
+  * style : "rectangular" : **Estilo de los dedos.** rectangular=simple, springs=resorte, barbs=púas, snap=clic
+  * surroundingspaces : 2.0 : **Espacio extra al inicio y fin** (múltiplos del espacio normal entre dedos)
 
-* relative (in multiples of thickness)
+* relative (en múltiplos del espesor del material)
 
-  * space : 2.0 : space between fingers (multiples of thickness)
-  * finger : 2.0 : width of the fingers (multiples of thickness)
-  * width : 1.0 : width of finger holes (multiples of thickness)
-  * edge_width : 1.0 : space below holes of FingerHoleEdge (multiples of thickness)
-  * play : 0.0 : extra space to allow finger move in and out (multiples of thickness)
-  * extra_length : 0.0 : extra material to grind away burn marks (multiples of thickness)
-  * bottom_lip : 0.0 : height of the bottom lips sticking out  (multiples of thickness) FingerHoleEdge only!
+  * space : 2.0 : **Espacio ENTRE dedos** (cuánto material se quita entre cada dedo)
+  * finger : 2.0 : **Ancho DE LOS DEDOS** (parte sólida que encaja en la ranura)
+  * width : 1.0 : **Ancho de las ranuras** para los dedos (debe ser = thickness + kerf)
+  * edge_width : 1.0 : **Margen inferior** debajo de las ranuras (para bordes más resistentes)
+  * play : 0.0 : **Juego extra** para facilitar ensamblaje (positivo = más holgado)
+  * extra_length : 0.0 : **Material extra** para lijar marcas de quemadura después del corte
+  * bottom_lip : 0.0 : **Reborde inferior** que sobresale (solo para FingerHoleEdge)
+
+💡 **RECOMENDACIONES PARA MDF 3mm:**
+- `space` = 2.0-3.0, `finger` = 2.0-3.0 → Dedos equilibrados
+- `play` = 0.05 → Ligero juego para pegar sin forzar
+- `width` = 1.0 → Ranura = espesor exacto (ajusta si el láser quema mucho)
+
+⚠️ **PROBLEMAS COMUNES:**
+- Dedos muy apretados → Aumenta `play` a 0.1 o reduce `width` a 0.95
+- Dedos muy sueltos → Reduce `play` o aumenta `width`
+- Paredes se rompen → Aumenta `edge_width` a 1.5
 """
 
     absolute_params = {
