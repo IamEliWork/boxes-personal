@@ -1,5 +1,5 @@
 # Archivo: boxes/generators/custom_silhouette.py
-import os
+from pathlib import Path
 import cv2
 import numpy as np
 from boxes import Boxes
@@ -15,84 +15,91 @@ class CustomSilhouetteGenerator(Boxes):
 
     def __init__(self):
         super().__init__()
-        self.add_argument(
-            "base_shape", type=str, default="circle", choices=["circle", "rectangle"],
+        self.argparser.add_argument(
+            "--base_shape", type=str, default="circle", choices=["circle", "rectangle"],
             help="Forma base del trofeo/medalla."
         )
-        self.add_argument(
-            "base_size", type=float, default=60.0,
+        self.argparser.add_argument(
+            "--base_size", type=float, default=60.0,
             help="Diámetro (si es círculo) o lado (si es cuadrado) de la base (mm)."
         )
-        self.add_argument(
-            "image_filename", type=str, default="bailarina.png",
+        self.argparser.add_argument(
+            "--image_filename", type=str, default="bailarina.png",
             help="Nombre del archivo PNG en 'static/images/'. Debe tener fondo transparente o ser blanco/negro."
         )
-        self.add_argument(
-            "image_scale", type=float, default=1.0,
+        self.argparser.add_argument(
+            "--image_scale", type=float, default=1.0,
             help="Escala de la imagen (1.0 = tamaño original del PNG en px a mm). Ajustar para que encaje."
         )
-        self.add_argument(
-            "image_rotation", type=float, default=0.0,
+        self.argparser.add_argument(
+            "--image_rotation", type=float, default=0.0,
             help="Rotación de la silueta antes de fusionarla (grados)."
         )
-        self.add_argument(
-            "protrusion_offset", type=float, default=10.0,
+        self.argparser.add_argument(
+            "--protrusion_offset", type=float, default=10.0,
             help="Cuánto debe sobresalir la imagen del borde base (mm)."
         )
-        self.add_argument(
-            "min_neck_width", type=float, default=4.0,
+        self.argparser.add_argument(
+            "--min_neck_width", type=float, default=4.0,
             help="Ancho mínimo de seguridad en la unión para evitar roturas (mm). ¡Crítico para acrílico!"
         )
-        self.add_argument(
-            "simplify_tolerance", type=float, default=0.5,
+        self.argparser.add_argument(
+            "--simplify_tolerance", type=float, default=0.5,
             help="Suavizado del contorno. Mayor valor = menos nodos = corte más rápido y limpio."
         )
 
-    def get_image_contour(self, filename, scale, offset):
+    def get_image_contour(self, filename: str, scale: float, offset: float) -> Polygon | None:
         """Procesa el PNG y devuelve un polígono de Shapely."""
-        filepath = os.path.join(os.path.dirname(__file__), "..", "static", "images", filename)
+        filepath = Path(__file__).parent / ".." / "static" / "images" / filename
         
-        if not os.path.exists(filepath):
+        if not filepath.exists():
+            print(f"Warning: File not found: {filepath}")
             return box(-10, -10, 10, 10)
 
-        img = cv2.imread(filepath, cv2.IMREAD_UNCHANGED)
-        if img is None:
-            return box(-10, -10, 10, 10)
+        try:
+            img = cv2.imread(str(filepath), cv2.IMREAD_UNCHANGED)
+            if img is None:
+                print(f"Error: Failed to load image: {filepath}")
+                return box(-10, -10, 10, 10)
+                
+            # Manejar canal alfa (transparencia)
+            if len(img.shape) == 3 and img.shape[2] == 4:
+                alpha = img[:, :, 3]
+                _, thresh = cv2.threshold(alpha, 127, 255, cv2.THRESH_BINARY)
+            else:
+                gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) if len(img.shape) == 3 else img
+                _, thresh = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY_INV)
             
-        # Manejar canal alfa (transparencia)
-        if len(img.shape) == 3 and img.shape[2] == 4:
-            alpha = img[:, :, 3]
-            _, thresh = cv2.threshold(alpha, 127, 255, cv2.THRESH_BINARY)
-        else:
-            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) if len(img.shape) == 3 else img
-            _, thresh = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY_INV)
-        
-        contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        
-        if not contours:
-            return box(-10, -10, 10, 10)
+            contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            
+            if not contours:
+                print(f"Warning: No contours found in {filename}")
+                return box(-10, -10, 10, 10)
 
-        largest_contour = max(contours, key=cv2.contourArea)
-        
-        # Convertir a coordenadas de Shapely (escalando de px a mm)
-        points = [(pt[0][0] * scale, -pt[0][1] * scale) for pt in largest_contour]
-        poly = Polygon(points)
-        
-        # Simplificar para evitar miles de nodos
-        poly = poly.simplify(self.simplify_tolerance, preserve_topology=True)
-        
-        # Centrar y rotar
-        centroid = poly.centroid
-        poly = translate(poly, xoff=-centroid.x, yoff=-centroid.y)
-        
-        if self.image_rotation != 0:
-            poly = rotate(poly, self.image_rotation, origin=(0, 0))
-        
-        # Desplazar para que sobresalga
-        offset_y = (self.base_size / 2.0) + offset
-        poly = translate(poly, yoff=offset_y)
-        
-        return poly
+            largest_contour = max(contours, key=cv2.contourArea)
+            
+            # Convertir a coordenadas de Shapely (escalando de px a mm)
+            points = [(pt[0][0] * scale, -pt[0][1] * scale) for pt in largest_contour]
+            poly = Polygon(points)
+            
+            # Simplificar para evitar miles de nodos
+            poly = poly.simplify(self.simplify_tolerance, preserve_topology=True)
+            
+            # Centrar y rotar
+            centroid = poly.centroid
+            poly = translate(poly, xoff=-centroid.x, yoff=-centroid.y)
+            
+            if self.image_rotation != 0:
+                poly = rotate(poly, self.image_rotation, origin=(0, 0))
+            
+            # Desplazar para que sobresalga
+            offset_y = (self.base_size / 2.0) + offset
+            poly = translate(poly, yoff=offset_y)
+            
+            return poly
+        except (cv2.error, ValueError, IndexError) as e:
+            print(f"Error processing image {filename}: {e}")
+            return box(-10, -10, 10, 10)
 
     def render(self):
         # 1. Generar forma base

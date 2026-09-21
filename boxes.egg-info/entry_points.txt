@@ -1,0 +1,4 @@
+[console_scripts]
+boxes = boxes.scripts.boxes_main:main
+boxes_proxy = boxes.scripts.boxes_proxy:main
+boxesserver = boxes.scripts.boxesserver:main

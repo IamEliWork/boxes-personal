@@ -511,17 +511,17 @@ class Boxes:
         for arg, default in kw.items():
             if arg == "x":
                 if default is None: default = 100.0
-                help = "inner width in mm"
+                help = "**Ancho INTERIOR de la caja (mm).** Es la medida útil entre las paredes laterales, NO incluye el grosor de las paredes.\n\n**SI AUMENTAS este valor →** la caja se hace más ancha por dentro.\n\n**PARA CALCULAR el ancho EXTERIOR total:** suma `x + (2 × thickness)`.\n\n⚠️ **IMPORTANTE:** Si `outside=True`, este valor ya es el ancho exterior y no necesitas ajustar."
                 if "outside" in kw:
-                    help += " (unless outside selected)"
+                    help += "\n\n💡 **TIP:** Con `outside=False` (por defecto), mide el espacio que quieres guardar dentro. Con `outside=True`, mide el espacio total disponible en tu estante."
                 self.argparser.add_argument(
                     "--x", action="store", type=float, default=default,
                     help=help)
             elif arg == "y":
                 if default is None: default = 100.0
-                help = "inner depth in mm"
+                help = "**Profundidad INTERIOR de la caja (mm).** Medida desde el frente hasta el fondo, sin contar las paredes.\n\n**SI AUMENTAS este valor →** la caja se hace más profunda.\n\n**PARA CALCULAR la profundidad EXTERIOR total:** suma `y + (2 × thickness)`.\n\n⚠️ **IMPORTANTE:** Si `outside=True`, este valor ya es la profundidad exterior."
                 if "outside" in kw:
-                    help += " (unless outside selected)"
+                    help += "\n\n💡 **TIP:** Para cajas en estantes, usa `outside=True` y mide el espacio disponible. Para contenedores, usa `outside=False` y mide lo que vas a guardar."
                 self.argparser.add_argument(
                     "--y", action="store", type=float, default=default,
                     help=help)
@@ -530,24 +530,24 @@ class Boxes:
                 self.argparser.add_argument(
                     "--sx", action="store", type=argparseSections,
                     default=str(default),
-                    help="""sections left to right in mm [\U0001F6C8](https://florianfesti.github.io/boxes/html/usermanual.html#section-parameters)""")
+                    help="""**Divisiones horizontales (izquierda a derecha) en mm.** Define compartimentos internos.\n\n**FORMATO:**\n- `50*3` = 3 compartimentos de 50mm cada uno\n- `30/40/50` = 3 compartimentos de diferentes tamaños\n- `20*2/60` = 2 de 20mm + 1 de 60mm\n\n📐 **VER VISUALIZACIÓN:** Los valores se muestran en el diagrama de la caja.\n\n[📘 Más info](https://florianfesti.github.io/boxes/html/usermanual.html#section-parameters)""")
             elif arg == "sy":
                 if default is None: default = "50*3"
                 self.argparser.add_argument(
                     "--sy", action="store", type=argparseSections,
                     default=str(default),
-                    help="""sections back to front in mm [\U0001F6C8](https://florianfesti.github.io/boxes/html/usermanual.html#section-parameters)""")
+                    help="""**Divisiones verticales (frente a fondo) en mm.** Define filas de compartimentos.\n\n**FORMATO:** Igual que `sx` pero para la profundidad.\n\n**EJEMPLO:** `40*2` = 2 filas de 40mm de profundidad cada una.\n\n[📘 Más info](https://florianfesti.github.io/boxes/html/usermanual.html#section-parameters)""")
             elif arg == "sh":
                 if default is None: default = "50*3"
                 self.argparser.add_argument(
                     "--sh", action="store", type=argparseSections,
                     default=str(default),
-                    help="""sections bottom to top in mm [\U0001F6C8](https://florianfesti.github.io/boxes/html/usermanual.html#section-parameters)""")
+                    help="""**Divisiones verticales (abajo a arriba) en mm.** Para paredes internas escalonadas o múltiples niveles.\n\n**EJEMPLO:** `30/50/20` = 3 niveles de 30mm, 50mm y 20mm de altura.\n\n[📘 Más info](https://florianfesti.github.io/boxes/html/usermanual.html#section-parameters)""")
             elif arg == "h":
                 if default is None: default = 100.0
-                help = "inner height in mm"
+                help = "**Altura INTERIOR de la caja (mm).** Desde la base hasta el borde superior, sin contar tapas.\n\n**SI AUMENTAS este valor →** la caja es más alta.\n\n**ALTURA EXTERIOR TOTAL:** `h + thickness` (si tiene base cerrada).\n\n⚠️ **IMPORTANTE:** Si `outside=True`, este valor ya incluye todo."
                 if "outside" in kw:
-                    help += " (unless outside selected)"
+                    help += "\n\n💡 **TIP:** Para objetos altos (botellas, herramientas), añade 10-20mm extra para facilitar extracción."
                 self.argparser.add_argument(
                     "--h", action="store", type=float, default=default,
                     help=help)
@@ -555,12 +555,12 @@ class Boxes:
                 if default is None: default = 0.0
                 self.argparser.add_argument(
                     "--hi", action="store", type=float, default=default,
-                    help="inner height of inner walls in mm (unless outside selected)(leave to zero for same as outer walls)")
+                    help="**Altura de paredes INTERNAS (mm).** Para divisórias que no llegan al tope.\n\n**VALOR = 0:** Paredes internas misma altura que externas.\n\n**VALOR < h:** Paredes más bajas (útil para organizar sin separar completamente).\n\n⚠️ Solo aplica si hay divisiones (`sx`, `sy`).")
             elif arg == "hole_dD":
                 if default is None: default = "3.5:6.5"
                 self.argparser.add_argument(
                     "--hole_dD", action="store", type=argparseSections, default=default,
-                    help="mounting hole diameter (shaft:head) in mm [\U0001F6C8](https://florianfesti.github.io/boxes/html/usermanual.html#mounting-holes)")
+                    help="""**Agujeros de montaje (diámetro eje:cabeza) en mm.** Para tornillos que sujetan la caja.\n\n**FORMATO:** `d:D` donde:\n- `d` = diámetro del agujero pasante (eje del tornillo)\n- `D` = diámetro del avellanado (cabeza del tornillo)\n\n**EJEMPLOS COMUNES:**\n- `3.5:6.5` = Tornillo M3.5 estándar\n- `4.5:8.0` = Tornillo M4\n- `2.5:5.0` = Tornillo pequeño para electrónica\n\n[📘 Más info](https://florianfesti.github.io/boxes/html/usermanual.html#mounting-holes)""")
             elif arg == "bottom_edge":
                 choices = "Fhse"
                 if default is None: default = "h"
@@ -571,7 +571,7 @@ class Boxes:
                     "--bottom_edge", action="store",
                     type=ArgparseEdgeType(choices), choices=list(choices),
                     default=default,
-                    help="edge type for bottom edge")
+                    help="""**Tipo de borde INFERIOR.** Controla cómo se une la base con las paredes.\n\n**OPCIONES:**\n- `F` = Dedos de unión (finger joint) - más resistente\n- `h` = Borde recto simple - fácil de pegar\n- `s` = Ranura para encajar base\n- `e` = Borde sin tratar - requiere acabado manual\n\n💡 **RECOMENDACIÓN:** Usa `h` para MDF que vas a pegar, `F` para ensamblaje a presión.""")
             elif arg == "top_edge":
                 choices = "efFhcESŠikvLtGyY"
                 if default is None: default = "e"
@@ -581,18 +581,18 @@ class Boxes:
                 self.argparser.add_argument(
                     "--top_edge", action="store",
                     type=ArgparseEdgeType(choices), choices=list(choices),
-                    default=default, help="edge type for top edge")
+                    default=default, help="""**Tipo de borde SUPERIOR.** Para unir tapa o acabado decorativo.\n\n**OPCIONES PRINCIPALES:**\n- `e` = Borde recto (default)\n- `f` = Dedos pequeños\n- `F` = Dedos completos\n- `c` = Bisel para tapa inclinada\n- `E` = Borde escalonado\n\n💡 **TIP:** Si vas a añadir tapa separada, usa `e` o `c` para mejor acabado.""")
             elif arg == "outside":
                 if default is None: default = True
                 self.argparser.add_argument(
                     "--outside", action="store", type=boolarg, default=default,
-                    help="treat sizes as outside measurements [\U0001F6C8](https://florianfesti.github.io/boxes/html/usermanual.html#outside)")
+                    help="""**¿Las medidas son EXTERIORES? (True/False)**\n\n**True (recomendado):** Las medidas x, y, h son el tamaño TOTAL externo. Ideal cuando tienes un espacio limitado (estante, hueco) y necesitas que la caja quepa exactamente.\n\n**False:** Las medidas son del espacio INTERIOR útil. Ideal cuando sabes el tamaño de los objetos que vas a guardar.\n\n⚠️ **CAMBIA ESTO AFECTA:** Todos los cálculos de dimensiones. Si cambias este valor, revisa que las medidas finales sean correctas.\n\n[📘 Más info](https://florianfesti.github.io/boxes/html/usermanual.html#outside)""")
             elif arg == "nema_mount":
                 if default is None: default = 23
                 self.argparser.add_argument(
                     "--nema_mount", action="store",
                     type=int, choices=sorted(self.nema_sizes.keys()),
-                    default=default, help="NEMA size of motor")
+                    default=default, help="**Tamaño del motor NEMA.** Para montar motores paso a paso.\n\n**OPCIONES COMUNES:**\n- 17 = NEMA 17 (42×42mm) - Impresoras 3D, CNC pequeñas\n- 23 = NEMA 23 (57×57mm) - CNC medianas, robots\n- 34 = NEMA 34 (86×86mm) - Máquinas industriales\n\n⚠️ **SOLO USA** si necesitas montar un motor. Deja en 0 si no aplica.")
             else:
                 raise ValueError("No default for argument", arg)
 

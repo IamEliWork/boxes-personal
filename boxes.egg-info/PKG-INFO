@@ -1,0 +1,94 @@
+Metadata-Version: 2.4
+Name: boxes
+Version: 1.2
+Summary: Boxes generator for laser cutters
+Maintainer-email: Florian Festi <florian@festi.info>
+License-Expression: GPL-3.0-or-later
+Project-URL: Homepage, https://hackaday.io/project/10649-boxespy
+Project-URL: Repository, https://github.com/florianfesti/boxes
+Project-URL: Documentation, https://florianfesti.github.io/boxes/html/index.html
+Keywords: boxes,box,generator,svg,laser cutter
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Environment :: Console
+Classifier: Environment :: Web Environment
+Classifier: Intended Audience :: Manufacturing
+Classifier: Programming Language :: Python :: 3
+Classifier: Topic :: Multimedia :: Graphics :: Editors :: Vector-Based
+Classifier: Topic :: Scientific/Engineering
+Requires-Python: >=3.10
+Description-Content-Type: text/x-rst
+License-File: LICENSE.txt
+Requires-Dist: affine>=2.0
+Requires-Dist: markdown
+Requires-Dist: numpy
+Requires-Dist: pillow
+Requires-Dist: PyYAML
+Requires-Dist: qrcode>=7.3.1
+Requires-Dist: rectpack
+Requires-Dist: shapely>=1.8.2
+Requires-Dist: svgpathtools
+Requires-Dist: typing_extensions>=4.5.0
+Dynamic: license-file
+
+About Boxes.py
+==============
+
++----------------------------------------------+----------------------------------------------+----------------------------------------------+----------------------------------------------+----------------------------------------------+
+| .. image:: static/samples/NotesHolder.jpg    | .. image:: static/samples/OttoBody.jpg       | .. image:: static/samples/PaintStorage.jpg   | .. image:: static/samples/ShutterBox.jpg     | .. image:: static/samples/TwoPiece.jpg       |
++----------------------------------------------+----------------------------------------------+----------------------------------------------+----------------------------------------------+----------------------------------------------+
+
+* Boxes.py is an online box generator
+
+  * https://boxes.hackerspace-bamberg.de/
+
+* Boxes.py is an Inkscape plug-in
+* Boxes.py is library to write your own
+* Boxes.py is free software licensed under GPL v3+
+* Boxes.py is written in Python and runs with Python 3
+
+Boxes.py comes with a growing set of ready-to-use, fully parametrized
+generators. See https://florianfesti.github.io/boxes/html/generators.html for the full list.
+
++----------------------------------------------+----------------------------------------------+----------------------------------------------+
+| .. image:: static/samples/AngledBox.jpg      | .. image:: static/samples/FlexBox2.jpg       | .. image:: static/samples/HingeBox.jpg       |
++----------------------------------------------+----------------------------------------------+----------------------------------------------+
+
+Features
+--------
+
+Boxes.py generates SVG images that can be viewed directly in a web browser but also
+postscript and - with pstoedit as external helper - other vector formats
+including dxf, plt (aka hpgl) and gcode.
+
+Of course the library and the generators allow selecting the "thickness"
+of the material used and automatically adjusts lengths and width of
+joining fingers and other elements.
+
+The "burn" parameter compensates for the material removed by the laser. This
+allows fine tuning the gaps between joins up to the point where plywood
+can be press fitted even without any glue.
+
+Finger Joints are the work horse of the library. They allow 90° edges
+and T connections. Their size is scaled up with the material
+"thickness" to maintain the same appearance. The library also allows
+putting holes and slots for screws (bed bolts) into finger joints,
+although this is currently not supported for the included generators.
+
+Dovetail joints can be used to join pieces in the same plane.
+
+Flex cuts allows bending and stretching the material in one direction. This
+is used for rounded edges and living hinges.
+
++----------------------------------------------+----------------------------------------------+----------------------------------------------+
+|   .. image:: static/samples/TypeTray.jpg     |     .. image:: static/samples/BinTray.jpg    | .. image:: static/samples/DisplayShelf.jpg   |
++----------------------------------------------+----------------------------------------------+----------------------------------------------+
+| .. image:: static/samples/AgricolaInsert.jpg | .. image:: static/samples/HeartBox.jpg       | .. image:: static/samples/Atreus21.jpg       |
++----------------------------------------------+----------------------------------------------+----------------------------------------------+
+
+Documentation
+-------------
+
+Boxes.py comes with Sphinx based documentation for usage, installation
+and development.
+
+The rendered version can be viewed at <https://florianfesti.github.io/boxes/html/index.html>.
