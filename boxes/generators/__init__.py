@@ -6,9 +6,9 @@ import os
 import pkgutil
 from types import ModuleType
 from typing import Any
-
 from .medal import MedalGenerator
 from .custom_silhouette import CustomSilhouetteGenerator
+from .corel_component import CorelComponentGenerator
 import boxes
 
 ui_groups_by_name = {}  # type: ignore
